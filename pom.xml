@@ -72,6 +72,12 @@
             <artifactId>springfox-swagger-ui</artifactId>
             <version>2.6.1</version>
         </dependency>
+        <!--读取配置中心依赖-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+            <version>1.4.7.RELEASE</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
