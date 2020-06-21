@@ -13,7 +13,10 @@
 4.TODO 重要 AbstractAuthenticationProcessingFilter 类  107行,认证信息 写入 SecurityContextHolder
 108行 执行 this.rememberMeServices.loginSuccess(request, response, authResult)
 113行  执行登录成功处理 this.successHandler.onAuthenticationSuccess(request, response, authResult);
-
+三.接口请求校验
+BasicAuthenticationFilter 类 doFilterInternal()方法
+四.顶级拦截器,拦截所有请求
+AbstractAuthenticationProcessingFilter
 
 #学习文档
 #https://www.cnblogs.com/7788IT/p/10693150.html
