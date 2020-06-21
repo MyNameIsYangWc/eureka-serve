@@ -1,0 +1,19 @@
+开启formLogin模式:
+一.url请求流程
+1. AuthenticatorBase类 拦截请求URI
+    invoke()方法,189行
+2.TODO 重要 SecurityContextPersistenceFilter 类
+50行 此方法通过session获取用户登录信息 SecurityContext contextBeforeChainExecution = this.repo.loadContext(holder);
+如果为空跳转登录页面,否接校验用户信息.同意请求
+二.登录流程
+1.TODO  UsernamePasswordAuthenticationFilter 类 拦截 post请求 /login
+2.TODO 通过loadUserByUsername()方法从数据库查询用户信息,权限列表
+3.TODO AbstractUserDetailsAuthenticationProvider 类  80,81 行 用户,密码校验流程
+95行写入缓存, 用户校验信息写入UsernamePasswordAuthenticationToken对象 107行,DaoAuthenticationProvider类 38行 密码校验
+4.TODO 重要 AbstractAuthenticationProcessingFilter 类  107行,认证信息 写入 SecurityContextHolder
+108行 执行 this.rememberMeServices.loginSuccess(request, response, authResult)
+113行  执行登录成功处理 this.successHandler.onAuthenticationSuccess(request, response, authResult);
+
+
+#学习文档
+#https://www.cnblogs.com/7788IT/p/10693150.html
