@@ -35,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .cors().and().csrf().disable()
             .authorizeRequests()
                 //放行注册服务
-            .antMatchers("/eureka/apps/*").permitAll()
+            .antMatchers("/eureka/**").permitAll()
             .anyRequest().authenticated()
             .and()
             .formLogin();
