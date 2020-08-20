@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * 获取用户认证信息
  * @author 杨文超
- * @Date 2020-08-20
+ * @Date 2020-08-19
  */
 public class RedisUserDetailsManager implements UserDetailsManager {
 
@@ -30,6 +30,8 @@ public class RedisUserDetailsManager implements UserDetailsManager {
 
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private DataSource dataSource;
 
     /**
      * 根据账号获取用户信息校验
@@ -40,20 +42,31 @@ public class RedisUserDetailsManager implements UserDetailsManager {
      */
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         HashOperations ops = redisTemplate.opsForHash();
-        JSONObject userDetails = JSON.parseObject((String) ops.get("oauth", username.toLowerCase()));
-        if (userDetails == null) {
-            logger.warn("{}在redis中不存在",username.toLowerCase());
-            throw new UsernameNotFoundException(username);
-        } else {
-            logger.info("{}在redis存在",username.toLowerCase());
-            //权限列表
-            Collection authorities=new ArrayList();
-            userDetails.getJSONArray("authorities").stream().forEach(item->{
-                authorities.add(new SimpleGrantedAuthority( ((Map)item).get("authority").toString()));
-            });
+        boolean flag;
+        JSONObject userDetails;
+        do{
+            userDetails = JSON.parseObject((String) ops.get("oauth", username.toLowerCase()));
+            flag=false;
+            if (userDetails == null) {
+                logger.warn("{}在redis中不存在",username.toLowerCase());
+                flag=true;
+                JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+                jdbcUserDetailsManager.setUsersByUsernameQuery("select username,password,enabled from user where username = ? and del_flag=0");
+                UserDetails userDetails1 = jdbcUserDetailsManager.loadUserByUsername(username);
+                if(userDetails1==null){
+                    throw new UsernameNotFoundException(username);
+                }
+                ops.put("oauth",username.toLowerCase(),JSON.toJSONString(userDetails1));
+            }
+        }while (flag);
+        logger.info("{}在redis存在",username.toLowerCase());
+        //权限列表
+        Collection authorities=new ArrayList();
+        userDetails.getJSONArray("authorities").stream().forEach(item->{
+            authorities.add(new SimpleGrantedAuthority( ((Map)item).get("authority").toString()));
+        });
         return new User(userDetails.getString("username"),userDetails.getString("password"),userDetails.getBoolean("enabled"),userDetails.getBoolean("accountNonExpired"),
                 userDetails.getBoolean("credentialsNonExpired"),userDetails.getBoolean("accountNonLocked"),authorities);
-        }
     }
 
     @Override
